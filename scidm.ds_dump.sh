@@ -1,0 +1,107 @@
+#!/bin/bash
+
+####
+# Author : Ceasar Sun , Power by SciDM project
+# Goal : Dump metadata and resource of dataset by assigned 
+# Usage: $0 [-a [api-key] -r [ckan-site] -d [dump path]] <dataset-id-1> <dataset-id-2>
+#	scidmdump.sh api-test002 fashion-mnist
+#	scidmdump.sh -a [api-key] -d dir01 datacon2019clipper
+
+#1. 取得資料集內容：
+#curl -X POST https://scidm.nchc.org.tw/api/3/action/package_show -H "Authorization: c9afb206-e166-4390-8d51-ba6a28dc9159" -d '{"id":"sample-dcm"}' | jq
+
+#3. 下載檔案(resource)：
+#wget --no-check-certificate https://scidm.nchc.org.tw/..../url.ext  --header 'Authorization: ....'
+
+APIKEY_HEADER=""
+dump_log="scidm-dump.log"
+
+ckan_site="https://scidm.nchc.org.tw"
+api_key=""
+dump_dir="$(pwd)"
+dataset_list=""
+
+# get parameter form command
+while getopts a:r:d: option
+do
+  case "${option}"
+  in
+    a) [ ! -z "${OPTARG}" ] && api_key=${OPTARG} ;;
+    r) [ ! -z "${OPTARG}" ] && ckan_site=${OPTARG};;
+    d) [ ! -z "${OPTARG}" ] && dump_dir=${OPTARG};;
+  esac
+done
+
+shift $(($OPTIND - 1))
+dataset_list=$@
+
+#echo "'$ckan_site' , '$api_key' ,'$dump_dir' ,'$dataset_list'"
+
+# Check required parameters
+[ -z "$dataset_list" ] && echo "No [package-name]' , exit !!" && exit;
+
+[ ! -d "${dump_dir}" ] && mkdir -p ${dump_dir}
+[ ! -w "${dump_dir}" ] && echo ""Create dump dir fail !! && exit 1
+[ ! -z "$api_key" ] && APIKEY_HEADER="--header 'Authorization: $api_key'"
+
+pushd ${dump_dir} > /dev/null
+
+for pid in $dataset_list ; do
+  
+  echo "Star to dump : $pid"
+  mkdir -p ${pid}/data
+
+  # deal with dataset
+  cd ${pid}
+
+  # dump metadata fro dataset
+    wget -q ${ckan_site}/api/3/action/package_show?id=${pid} -O - | jq '.' > metadata.json
+
+    # download resource  foreach
+
+    total_c=0
+    success_c=0
+    fail_c=0
+
+    ## deal with value with space , such as : {"name": "clipper 投影片 2019.09.05","url": "https://aaa"}
+    SAVEIFS=$IFS
+    IFS=$(echo -en "\n\b")
+    
+    #for resource_url in `cat metadata.json | jq '.result.resources[].url' ` ; do 
+    for entry in `jq -c '.result.resources[]|{"name","url"}' metadata.json`; do
+      #echo "'$entry'"
+      eval "$(echo $entry |jq -r ' to_entries | .[] | .key + "=\"" + .value + "\""' )"
+      resource_url="$url"
+      resource_name="$name"
+      total_c=`expr $total_c + 1`
+
+      #echo "'$resource_url', '$resource_name'"
+      #continue;
+
+      if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
+        echo -n "#$total_c : Download resource : '$resource_name' ..."
+        eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
+	if [ "$?" -eq 0 ] ; then
+          echo " done." ; echo "Successed : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
+	else
+	  rm -rf data/${resource_name}
+          echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
+	fi
+      else
+	success_c=`expr $success_c + 1`
+	echo "#$total_c : write url to '${resource_name}.url'"
+        echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
+        echo "$resource_url" > data/${resource_name}.url
+      fi
+
+      #read
+    done
+
+    IFS=$SAVEIFS
+    echo "Total=$total_c ,Successed=$success_c, Failed=$fail_c"
+  cd ..
+done
+
+popd > /dev/null
+
+exit 0
