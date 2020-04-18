@@ -16,18 +16,25 @@ if [ -n "$colors_no" ]; then
 fi
 
 #--- Sub function
-initienv() {
+initenv() {
+
+  [ -e "${_SCICMDRC}" ] && mv ${_SCICMDRC} ${_SCICMDRC}.bak
+
   $SETCOLOR_WARNING;
+  echo "Start to initenv:"
+  echo "Touch ${_SCICMDRC} and write md5sum: $_SCICMD_MD5SUM"
+  echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
+
   echo "Check ~/bin and \$PATH ..."
-  read -p [Enter] to og or [Ctrl + c] to exit
-  [ -d "_BIN_PATH" ] || mkdir ~/bin
-  if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:)" ] ; then
+  read -p '[Enter] to og or [Ctrl + c] to exit'
+  #[ -d "$_BIN_PATH" ] || mkdir ~/bin
+  if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:") " ] ; then
     export PATH=${PATH}:${HOME}/bin
     [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${PATH}:${HOME}/bin" >> ~/.bashrc
   fi
 
   echo "Install required package ..."
-  read -p [Enter] to go or [Ctrl + c] to exit
+  read -p '[Enter] to go or [Ctrl + c] to exit'
   sudo apt install $_REQUIRED_PACKAGE
   [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
@@ -35,6 +42,7 @@ initienv() {
 }
 
 update() {
+  echo "Start to update"
   
 
 }
@@ -53,11 +61,19 @@ print_help() {
 ### Main
 
 _SCICMDRC="${HOME}/.scicmdrc"
-#_BIN_PATH="${HOME}/bin"
+_BIN_PATH="${HOME}/bin"
 _REQUIRED_PACKAGE="s3fs jq python-pip curl wgeti git"
 
+_REALPATH="$(readlink -f `pwd`/$0)"
+[ -d "$_BIN_PATH" ] || mkdir ~/bin
+[ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] && wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "${_BIN_PATH}/scicmd" && chmod +x "${_BIN_PATH}/scicmd" &&  eval "${_BIN_PATH}/scicmd" && exit 0;
+
+
+_SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
 [ -f "${_SCICMDRC}" ] || initenv;
+
+read -p [stop here ]
 
 case "$1" in
   initenv)
