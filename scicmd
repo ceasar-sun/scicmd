@@ -38,16 +38,16 @@ initenv() {
   sudo apt install $_REQUIRED_PACKAGE
   [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
-  $SETCOLOR_SUCCESS ; echo "Environment check well for go. "; $SETCOLOR_NORMAL
+  $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
+
 }
 
 update() {
   echo "Start to update"
-  wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/${_BIN_PATH}/scicmd"
-  cp /tmp/${_BIN_PATH}/scicmd ${_BIN_PATH}/scicmd
+  wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/scicmd.tmp"
+  cp /tmp/scicmd.tmp ${_BIN_PATH}/scicmd
   sync; sync;
   chmod +x "${_BIN_PATH}/scicmd"
-  exec ${_BIN_PATH}/scicmd ;
 }
 
 print_help() {
@@ -68,23 +68,20 @@ _BIN_PATH="${HOME}/bin"
 _REQUIRED_PACKAGE="s3fs jq python-pip curl wget git"
 
 _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
-#echo $_REALPATH
-#read
+
 [ -d "$_BIN_PATH" ] || mkdir ~/bin
-#[ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ]  && cp $_REALPATH "${_BIN_PATH}/scicmd" && chmod +x "${_BIN_PATH}/scicmd" &&  sync  && exec ${_BIN_PATH}/scicmd ;
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
-  wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "${_BIN_PATH}/scicmd"
-  sync; sync;
-  chmod +x "${_BIN_PATH}/scicmd"
+  update
   exec ${_BIN_PATH}/scicmd ;
 fi
 
 _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
-[ -f "${_SCICMDRC}" ] || initenv;
+[ -f "${_SCICMDRC}" ] || (initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
+_action=$1
 
-case "$1" in
+case "$_action" in
   initenv)
         initenv
         ;;
