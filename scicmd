@@ -43,8 +43,11 @@ initenv() {
 
 update() {
   echo "Start to update"
-  
-
+  wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/${_BIN_PATH}/scicmd"
+  cp /tmp/${_BIN_PATH}/scicmd ${_BIN_PATH}/scicmd
+  sync; sync;
+  chmod +x "${_BIN_PATH}/scicmd"
+  exec ${_BIN_PATH}/scicmd ;
 }
 
 print_help() {
@@ -70,17 +73,16 @@ _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOUR
 [ -d "$_BIN_PATH" ] || mkdir ~/bin
 #[ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ]  && cp $_REALPATH "${_BIN_PATH}/scicmd" && chmod +x "${_BIN_PATH}/scicmd" &&  sync  && exec ${_BIN_PATH}/scicmd ;
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
-	wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "${_BIN_PATH}/scicmd"
-	sync; sync;
-	chmod +x "${_BIN_PATH}/scicmd"
-	exec ${_BIN_PATH}/scicmd ;
+  wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "${_BIN_PATH}/scicmd"
+  sync; sync;
+  chmod +x "${_BIN_PATH}/scicmd"
+  exec ${_BIN_PATH}/scicmd ;
 fi
 
 _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
 [ -f "${_SCICMDRC}" ] || initenv;
 
-read -p '[stop here ]'
 
 case "$1" in
   initenv)
@@ -95,6 +97,7 @@ case "$1" in
 
   update)
         update
+	read -p '[stop here ]'
         ;;
   *)
         print_help;
