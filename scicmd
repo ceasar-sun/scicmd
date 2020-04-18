@@ -62,7 +62,7 @@ print_help() {
 
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="${HOME}/bin"
-_REQUIRED_PACKAGE="s3fs jq python-pip curl wgeti git"
+_REQUIRED_PACKAGE="s3fs jq python-pip curl wget git"
 
 _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 #echo $_REALPATH
