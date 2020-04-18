@@ -72,7 +72,7 @@ _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOUR
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
 	wget https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "${_BIN_PATH}/scicmd"
 	sync; sync;
-	chmod +x "${_BIN_PATH}/scicmd"sync
+	chmod +x "${_BIN_PATH}/scicmd"
 	exec ${_BIN_PATH}/scicmd ;
 fi
 
