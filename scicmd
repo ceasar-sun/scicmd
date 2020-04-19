@@ -121,7 +121,7 @@ _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOUR
 [ -d "$_BIN_PATH" ] || mkdir ~/bin
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
   update
-  exec ${_BIN_PATH}/scicmd ;
+  exec ${_BIN_PATH}/scicmd $@;
 fi
 
 _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
