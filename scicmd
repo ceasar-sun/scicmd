@@ -129,8 +129,6 @@ _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
 _action=$1
 
-[ -z "$1" ] && _action=s3fs-public
-
 case "$_action" in
   initenv)
         initenv
@@ -144,7 +142,6 @@ case "$_action" in
 
   update)
         update
-	read -p '[stop here ]'
         ;;
   *)
         print_help;
