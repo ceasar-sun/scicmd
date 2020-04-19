@@ -56,7 +56,8 @@ s3fs-public() {
   _SCIDM_S3_URL="http://s3.twcc.ai/"
 
   $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
-  [ ! -d "${_SCIDM_PUBLLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLLIC_S3_MNT
+  [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
+  [ "$?" != '0' ] && echo "mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
 
   if [ -n "$( mount | grep -E 's3fs .* $_SCIDM_PUBLIC_S3_MNT'  )" ] ; then 
     echo "$_SCIDM_PUBLIC_S3_MNT is mounted !"
@@ -66,7 +67,7 @@ s3fs-public() {
   fi
 
 
-  echo "Test to mount Scid, public bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
+  echo "Test to mount Scidm public s3 bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
   s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
   _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
   if [ "$?" == '0' ] ; then
