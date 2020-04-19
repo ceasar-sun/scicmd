@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#########################################################
+#
+# Scicmd is set of tools for NCHC Scidm , it supports s3fs and collections of api method from CKAN project
+#	
+# Author: Ceasar Sun , Scidm team
+# Power by NCHC Scidm project
+#
+#########################################################
 
 # Check if terminal supports colors output
 colors_no="$(LC_ALL=C tput colors 2>/dev/null)"
@@ -20,8 +28,7 @@ initenv() {
 
   [ -e "${_SCICMDRC}" ] && mv ${_SCICMDRC} ${_SCICMDRC}.bak
 
-  $SETCOLOR_WARNING;
-  echo "Start to initenv:"
+  $SETCOLOR_WARNING; echo "Start to initenv:"; $SETCOLOR_NORMAL
   echo "Touch ${_SCICMDRC} and write md5sum: $_SCICMD_MD5SUM"
   echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
 
@@ -39,6 +46,47 @@ initenv() {
   [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
+
+}
+
+s3fs-public() {
+
+  _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.ro)"
+  _SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
+  _SCIDM_S3_URL="http://s3.twcc.ai/"
+
+  $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
+  [ ! -d "${_SCIDM_PUBLLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLLIC_S3_MNT
+
+  if [ -n "$( mount | grep -E 's3fs .* $_SCIDM_PUBLIC_S3_MNT'  )" ] ; then 
+    echo "$_SCIDM_PUBLIC_S3_MNT is mounted !"
+    $SETCOLOR_WARNING; read -p '[Enter] to go however , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
+    echo "Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
+    sudo umount ${_SCIDM_PUBLIC_S3_MNT}
+  fi
+
+
+  echo "Test to mount Scid, public bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
+  s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
+  _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
+  if [ "$?" == '0' ] ; then
+    $SETCOLOR_SUCCESS ; echo "Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
+    mount | grep s3fs
+  else
+    $SETCOLOR_FAILURE ; echo "Mount public Scidm s3fs : failure ! Please ask for support : 'isupport@narlabs.org.tw'"; $SETCOLOR_NORMAL ; exit 1
+  fi
+
+
+  echo "Setup auto-mount at booting ..."
+  if [ -n "$(crontab -l | grep -E '^@reboot * s3fs * ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}')"  ] ; then
+    echo "	Already configured in user crontab, skip this .."
+  else
+    echo "	Add auto-mount into user crontab ..."
+    echo "@reboot        s3fs 202004covid19obj /home/ceasar/s3.scidm.ro  -o url=http://s3.twcc.ai/ -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUP -o public_bucket=1" | crontab -
+    echo "	Success ! Public s3 of Scidm would be auto-mount when next boot."
+  fi
+  $SETCOLOR_SUCCESS ; echo "Scidm public s3 is ready to use and mounted in '${_SCIDM_PUBLIC_S3_MNT}' :"; $SETCOLOR_NORMAL ;
+  ls -al ${_SCIDM_PUBLIC_S3_MNT}
 
 }
 
@@ -80,6 +128,8 @@ _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 [ -f "${_SCICMDRC}" ] || (initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
 _action=$1
+
+[ -z "$1" ] && _action=s3fs-public
 
 case "$_action" in
   initenv)
