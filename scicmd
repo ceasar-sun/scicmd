@@ -41,8 +41,8 @@ initenv() {
   read -p '[Enter] to go / [Ctrl + c] to exit'
   #[ -d "$_BIN_PATH" ] || mkdir ~/bin
   if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:")" ] ; then
-    export PATH=${PATH}:${HOME}/bin
-    [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${PATH}:${HOME}/bin" >> ~/.bashrc
+    NEWPATH=${PATH}:${HOME}/bin
+    [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${NEWPATH}" >> ~/.bashrc
   fi
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
