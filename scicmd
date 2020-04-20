@@ -101,7 +101,7 @@ update() {
   git clone https://github.com/ceasar-sun/scicmd.git /tmp/scicmd.git.tmp 
   cp /tmp/scicmd.git.tmp/scicmd* ${_BIN_PATH}/
   sync; sync;
-  chmod +x "${_BIN_PATH}/scicmd*"
+  chmod +x ${_BIN_PATH}/scicmd*
   echo "done"
 }
 
