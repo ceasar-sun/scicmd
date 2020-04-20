@@ -93,11 +93,15 @@ s3fs-public() {
 }
 
 update() {
-  echo "Start to update"
+  $SETCOLOR_WARNING; echo "Start to update ...." ;  $SETCOLOR_NORMAL
+  echo -n "Update scicmd ..."
+  i#wget wget https://github.com/ceasar-sun/scicmd/archive/master.zip -O /tmp/scicmd-master.zip
+  
   wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/scicmd.tmp"
   mv /tmp/scicmd.tmp ${_BIN_PATH}/scicmd
   sync; sync;
   chmod +x "${_BIN_PATH}/scicmd"
+  echo "done"
 }
 
 print_help() {
@@ -115,7 +119,7 @@ print_help() {
 
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
-_REQUIRED_PACKAGE="s3fs jq python-pip curl wget git"
+_REQUIRED_PACKAGE="s3fs jq python-pip sqlite3 curl wget git"
 
 _REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 
@@ -129,7 +133,7 @@ _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
 [ -f "${_SCICMDRC}" ] || (initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
-_action=$1
+_action=$1 && shift;
 
 case "$_action" in
   initenv)
@@ -141,7 +145,9 @@ case "$_action" in
   s3fs-purge)
         s3fs-purge
         ;;
-
+  dump)
+        scicmd.dump $@
+        ;;
   update)
         update
         ;;

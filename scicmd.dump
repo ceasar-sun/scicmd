@@ -14,11 +14,11 @@
 #wget --no-check-certificate https://scidm.nchc.org.tw/..../url.ext  --header 'Authorization: ....'
 
 APIKEY_HEADER=""
-dump_log="scidm-dump.log"
+dump_log="scicmd.dump.log"
 
 ckan_site="https://scidm.nchc.org.tw"
 api_key=""
-dump_dir="$(pwd)"
+dump_dir="$( readlink -f ~/my-scidata.rep )"
 dataset_list=""
 
 # get parameter form command
