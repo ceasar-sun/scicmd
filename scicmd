@@ -95,12 +95,13 @@ s3fs-public() {
 update() {
   $SETCOLOR_WARNING; echo "Start to update ...." ;  $SETCOLOR_NORMAL
   echo -n "Update scicmd ..."
-  i#wget wget https://github.com/ceasar-sun/scicmd/archive/master.zip -O /tmp/scicmd-master.zip
-  
-  wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/scicmd.tmp"
-  mv /tmp/scicmd.tmp ${_BIN_PATH}/scicmd
+  [ -e "/tmp/scicmd.git.tmp" ] && rm -rf "/tmp/scicmd.git.tmp"
+  #wget wget https://github.com/ceasar-sun/scicmd/archive/master.zip -O /tmp/scicmd-master.zip
+  #wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/scicmd.tmp"
+  git clone https://github.com/ceasar-sun/scicmd.git /tmp/scicmd.git.tmp 
+  cp /tmp/scicmd.git.tmp/scicmd* ${_BIN_PATH}/
   sync; sync;
-  chmod +x "${_BIN_PATH}/scicmd"
+  chmod +x "${_BIN_PATH}/scicmd*"
   echo "done"
 }
 
