@@ -149,6 +149,7 @@ case "$_action" in
         s3fs-purge
         ;;
   dump)
+        shift;
         scicmd.dump $@
         ;;
   update)

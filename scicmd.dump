@@ -21,6 +21,8 @@ api_key=""
 dump_dir="$( readlink -f ~/my-scidata.rep )"
 dataset_list=""
 
+#echo $@
+
 # get parameter form command
 while getopts a:r:d: option
 do
@@ -35,7 +37,7 @@ done
 shift $(($OPTIND - 1))
 dataset_list=$@
 
-#echo "'$ckan_site' , '$api_key' ,'$dump_dir' ,'$dataset_list'"
+echo "use site:'$ckan_site' , api-key:'$api_key' ,dump-dir:'$dump_dir' ,datasets:'$dataset_list'"
 
 # Check required parameters
 [ -z "$dataset_list" ] && echo "No [package-name]' , exit !!" && exit;
