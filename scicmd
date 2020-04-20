@@ -31,6 +31,7 @@ initenv() {
   $SETCOLOR_WARNING; echo "Start to initenv:"; $SETCOLOR_NORMAL
   echo "	Touch ${_SCICMDRC} and write md5sum: $_SCICMD_MD5SUM"
   echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
+  chmod 600 ${_SCICMDRC}
 
   echo "	Install required package : $_REQUIRED_PACKAGE "
   read -p '[Enter] to go / [Ctrl + c] to exit'
