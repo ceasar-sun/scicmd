@@ -34,7 +34,7 @@ initenv() {
 
   echo "	Install required package : $_REQUIRED_PACKAGE "
   read -p '[Enter] to go / [Ctrl + c] to exit'
-  sudo apt install $_REQUIRED_PACKAGE
+  sudo apt update ; sudo apt install $_REQUIRED_PACKAGE
   [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
   echo "	Check ~/bin and \$PATH ..."
