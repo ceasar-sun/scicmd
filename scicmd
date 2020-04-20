@@ -29,21 +29,21 @@ initenv() {
   [ -e "${_SCICMDRC}" ] && mv ${_SCICMDRC} ${_SCICMDRC}.bak
 
   $SETCOLOR_WARNING; echo "Start to initenv:"; $SETCOLOR_NORMAL
-  echo "Touch ${_SCICMDRC} and write md5sum: $_SCICMD_MD5SUM"
+  echo "	Touch ${_SCICMDRC} and write md5sum: $_SCICMD_MD5SUM"
   echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
 
-  echo "Check ~/bin and \$PATH ..."
+  echo "	Install required package : $_REQUIRED_PACKAGE "
+  read -p '[Enter] to go / [Ctrl + c] to exit'
+  sudo apt install $_REQUIRED_PACKAGE
+  [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
+
+  echo "	Check ~/bin and \$PATH ..."
   read -p '[Enter] to go / [Ctrl + c] to exit'
   #[ -d "$_BIN_PATH" ] || mkdir ~/bin
   if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:")" ] ; then
     export PATH=${PATH}:${HOME}/bin
     [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${PATH}:${HOME}/bin" >> ~/.bashrc
   fi
-
-  echo "Install required package : $_REQUIRED_PACKAGE "
-  read -p '[Enter] to go / [Ctrl + c] to exit'
-  sudo apt install $_REQUIRED_PACKAGE
-  [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
 
@@ -57,24 +57,24 @@ s3fs-public() {
 
   $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
-  [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] && echo "mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
+  [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] && echo "	mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
 
   if [ -n "$( mount | grep -E 's3fs .* $_SCIDM_PUBLIC_S3_MNT'  )" ] ; then 
-    echo "$_SCIDM_PUBLIC_S3_MNT is mounted !"
+    echo "	$_SCIDM_PUBLIC_S3_MNT is mounted !"
     $SETCOLOR_WARNING; read -p '[Enter] to go however , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
-    echo "Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
+    echo "	Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
     sudo umount ${_SCIDM_PUBLIC_S3_MNT}
   fi
 
 
-  echo "Test to mount Scidm public s3 bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
+  echo "	Test to mount Scidm public s3 bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
   s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
   _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
   if [ "$?" == '0' ] ; then
-    $SETCOLOR_SUCCESS ; echo "Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
+    $SETCOLOR_SUCCESS ; echo "	Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
     mount | grep s3fs
   else
-    $SETCOLOR_FAILURE ; echo "Mount public Scidm s3fs : failure ! Please ask for support : 'isupport@narlabs.org.tw'"; $SETCOLOR_NORMAL ; exit 1
+    $SETCOLOR_FAILURE ; echo "	Mount public Scidm s3fs : failure ! Please ask for support : 'isupport@narlabs.org.tw'"; $SETCOLOR_NORMAL ; exit 1
   fi
 
 
@@ -86,7 +86,7 @@ s3fs-public() {
     echo "@reboot        s3fs 202004covid19obj /home/ceasar/s3.scidm.ro  -o url=http://s3.twcc.ai/ -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUP -o public_bucket=1" | crontab -
     echo "	Success ! Public s3 of Scidm would be auto-mount when next boot."
   fi
-  $SETCOLOR_SUCCESS ; echo "Scidm public s3 is ready to use and mounted in '${_SCIDM_PUBLIC_S3_MNT}' :"; $SETCOLOR_NORMAL ;
+  $SETCOLOR_SUCCESS ; echo "	Scidm public s3 is ready to use and mounted in '${_SCIDM_PUBLIC_S3_MNT}' :"; $SETCOLOR_NORMAL ;
   ls -al ${_SCIDM_PUBLIC_S3_MNT}
 
 }
