@@ -38,13 +38,13 @@ initenv() {
   sudo apt update ; sudo apt install $_REQUIRED_PACKAGE
   [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
-  echo "	Check ~/bin and \$PATH ..."
-  read -p '[Enter] to go / [Ctrl + c] to exit'
-  #[ -d "$_BIN_PATH" ] || mkdir ~/bin
-  if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:")" ] ; then
-    NEWPATH=${PATH}:${HOME}/bin
-    [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${NEWPATH}" >> ~/.bashrc
-  fi
+  ## Ubuntu 18.04 would auto-add ~/bin into $PATH
+  #echo "	Check ~/bin and \$PATH ..."
+  #read -p '[Enter] to go / [Ctrl + c] to exit'
+  #if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:")" ] ; then
+  #  NEWPATH=${PATH}:${HOME}/bin
+  #  [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${NEWPATH}" >> ~/.bashrc
+  #fi
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
 
@@ -84,7 +84,7 @@ s3fs-public() {
     echo "	Already configured in user crontab, skip this .."
   else
     echo "	Add auto-mount into user crontab ..."
-    echo "@reboot        s3fs 202004covid19obj /home/ceasar/s3.scidm.ro  -o url=http://s3.twcc.ai/ -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS -o public_bucket=1" | crontab -
+    echo "@reboot        s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS -o public_bucket=1" | crontab -
     echo "	Success ! Public s3 of Scidm would be auto-mount when next boot."
   fi
   $SETCOLOR_SUCCESS ; echo "	Scidm public s3 is ready to use and mounted in '${_SCIDM_PUBLIC_S3_MNT}' :"; $SETCOLOR_NORMAL ;
