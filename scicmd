@@ -131,28 +131,28 @@ _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
 _REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
 
-_REALPATH="$(readlink -f ${BASH_SOURCE[0]})"
+_CURRENT_REALRUN="$(readlink -f ${BASH_SOURCE[0]})"
 
 source <(grep -E '^ID=' /etc/os-release)
 _OS_VERSION=$ID
 
-source <(cat .scicmdrc | sed -e "s/^\s*#//g" -e "s/^\s*//g" -e "s/\s*=\s*/=/g")
+[ -f "$_SCICMDRC" ] && source <(cat .scicmdrc | sed -e "s/^\s*#//g" -e "s/^\s*//g" -e "s/\s*=\s*/=/g")
 
 
 [ -d "$_BIN_PATH" ] || mkdir -p $_BIN_PATH
-if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
-  mv ${_REALPATH} ${_BIN_PATH}/scicmd
+if [ "${_CURRENT_REALRUN}" != "${_BIN_PATH}/scicmd"  ] ; then
+  update
   exec ${_BIN_PATH}/scicmd $@;
 fi
 
 _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 
-[ -f "${_SCICMDRC}" ] || (initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
+[ -f "${_SCICMDRC}" ] || ( initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
 _action=$1
 
 case "$_action" in
-  initenv)
+  initienv)
         initenv
         ;;
   s3fs-public)
