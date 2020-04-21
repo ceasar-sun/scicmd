@@ -32,7 +32,7 @@ install_dep_pkg() {
     _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
     $SETCOLOR_WARNING; echo "Check required package : $_REQUIRED_PACKA "; $SETCOLOR_NORMAL
     for pkg in $_REQUIRED_PACKAGE ; do 
-      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; 
+      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; then
         sudo apt update ; sudo apt install -y $_REQUIRED_PACKAGE
         [ "$?" != '0' ] &&  _this_result='f'
         break;
@@ -41,7 +41,7 @@ install_dep_pkg() {
   elif [ "$_OS_VERSION" == "centos" ] ; then
     _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_RH
     for pkg in $_REQUIRED_PACKAGE ; do 
-      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; 
+      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; then
         sudo yum install epel-release -y
         sudo yum install $_REQUIRED_PACKAGE -y
         [ "$?" != '0' ] &&  _this_result='f'
@@ -148,8 +148,7 @@ _CURRENT_REALRUN="$(readlink -f ${BASH_SOURCE[0]})"
 source <(grep -E '^ID=' /etc/os-release)
 _OS_VERSION=$ID
 
-[ -f "$_SCICMDRC" ] && source <(cat .scicmdrc | sed -e "s/^\s*#//g" -e "s/^\s*//g" -e "s/\s*=\s*/=/g")
-
+[ -f "$_SCICMDRC" ] && source <(cat $_SCICMDRC | sed -e "s/^\s*#//g" -e "s/^\s*//g" -e "s/\s*=\s*/=/g")
 
 [ -d "$_BIN_PATH" ] || mkdir -p $_BIN_PATH
 if [ "${_CURRENT_REALRUN}" != "${_BIN_PATH}/scicmd"  ] ; then
