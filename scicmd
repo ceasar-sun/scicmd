@@ -64,7 +64,7 @@ initenv() {
   echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
   chmod 600 ${_SCICMDRC}
 
-  patch 
+  update 
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
 
