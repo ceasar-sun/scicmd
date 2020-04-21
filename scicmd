@@ -38,11 +38,11 @@ initenv() {
 
   if [ "$_OS_VERSION" == "ubuntu" ] ; then
     _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
-    sudo apt update ; sudo apt install $_REQUIRED_PACKAGE
+    sudo apt update ; sudo apt install -y $_REQUIRED_PACKAGE
   elif [ "$_OS_VERSION" == "centos" ] ; then
     _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_RH
     sudo yum install epel-release -y
-    sudo yum install $_REQUIRED_PACKAGE
+    sudo yum install $_REQUIRED_PACKAGE -y
   fi
     [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
@@ -128,8 +128,8 @@ print_help() {
 
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
-_REQUIRED_PACKAGEi_DEB="s3fs jq python-pip sqlite3 curl wget git"
-_REQUIRED_PACKAGEi_RH="jq python-pip curl wget git"
+_REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
+_REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
 
 _REALPATH="$(readlink -f ${BASH_SOURCE[0]})"
 
