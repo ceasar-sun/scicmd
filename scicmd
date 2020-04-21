@@ -35,8 +35,16 @@ initenv() {
 
   echo "	Install required package : $_REQUIRED_PACKAGE "
   read -p '[Enter] to go / [Ctrl + c] to exit'
-  sudo apt update ; sudo apt install $_REQUIRED_PACKAGE
-  [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
+
+  if [ "$_OS_VERSION" == "ubuntu" ] ; then
+    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
+    sudo apt update ; sudo apt install $_REQUIRED_PACKAGE
+  elif [ "$_OS_VERSION" == "centos" ]
+    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_RH
+    sudo yum install epel-release -y
+    sudo yum install $_REQUIRED_PACKAGE
+  fi
+    [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
 
   ## Ubuntu 18.04 would auto-add ~/bin into $PATH
   #echo "	Check ~/bin and \$PATH ..."
@@ -71,7 +79,7 @@ s3fs-public() {
   echo "	Test to mount Scidm public s3 bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
   s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
   _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
-  if [ "$?" == '0' ] ; then
+  if [ "$?" == '0' -a -n "$(mount | grep -E '^s3fs .*s3.scidm.ro')" ] ; then
     $SETCOLOR_SUCCESS ; echo "	Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
     mount | grep s3fs
   else
@@ -120,9 +128,16 @@ print_help() {
 
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
-_REQUIRED_PACKAGE="s3fs jq python-pip sqlite3 curl wget git"
+_REQUIRED_PACKAGEi_DEB="s3fs jq python-pip sqlite3 curl wget git"
+_REQUIRED_PACKAGEi_RH="s3fs jq python-pip curl wget git"
 
 _REALPATH="$(readlink -f ${BASH_SOURCE[0]})"
+
+source <(grep -E '^ID=' /etc/os-release)
+_OS_VERSION=$ID
+
+source <(cat .scicmdrc | sed -e "s/^\s*#//g" -e "s/^\s*//g" -e "s/\s*=\s*/=/g")
+
 
 [ -d "$_BIN_PATH" ] || mkdir -p $_BIN_PATH
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
