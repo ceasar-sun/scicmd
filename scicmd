@@ -145,14 +145,14 @@ if [ "${_CURRENT_REALRUN}" != "${_BIN_PATH}/scicmd"  ] ; then
   exec ${_BIN_PATH}/scicmd $@;
 fi
 
-_SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
+_SCICMD_MD5SUM="$( md5sum $_CURRENT_REALRUN | awk '{print $1}')"
 
 [ -f "${_SCICMDRC}" ] || ( initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
 _action=$1
 
 case "$_action" in
-  initienv)
+  initenv)
         initenv
         ;;
   s3fs-public)
