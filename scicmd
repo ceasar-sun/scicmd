@@ -123,7 +123,6 @@ _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE="s3fs jq python-pip sqlite3 curl wget git"
 
 _REALPATH="$(readlink -f ${BASH_SOURCE[0]})"
-#_REALPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 
 [ -d "$_BIN_PATH" ] || mkdir -p $_BIN_PATH
 if [ "${_REALPATH}" != "${_BIN_PATH}/scicmd"  ] ; then
@@ -136,7 +135,6 @@ _SCICMD_MD5SUM="$( md5sum $_REALPATH | awk '{print $1}')"
 [ -f "${_SCICMDRC}" ] || (initenv ; echo "Init finish ! You run 'scicmd' command next time directly");
 
 _action=$1
-#_action=$1 && shift;
 
 case "$_action" in
   initenv)
