@@ -30,7 +30,6 @@ install_dep_pkg() {
 
   if [ "$_OS_VERSION" == "ubuntu" ] ; then
     _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
-    $SETCOLOR_WARNING; echo "Check required package : $_REQUIRED_PACKA "; $SETCOLOR_NORMAL
     for pkg in $_REQUIRED_PACKAGE ; do 
       if [ ! -e "$(which $pkg 2>/dev/null)" ] ; then
         sudo apt update ; sudo apt install -y $_REQUIRED_PACKAGE
