@@ -24,8 +24,39 @@ if [ -n "$colors_no" ]; then
 fi
 
 #--- Sub function
+install_dep_pkg() {
+
+  $SETCOLOR_WARNING; echo "Check required package : $_REQUIRED_PACKA "; $SETCOLOR_NORMAL
+
+  if [ "$_OS_VERSION" == "ubuntu" ] ; then
+    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
+    $SETCOLOR_WARNING; echo "Check required package : $_REQUIRED_PACKA "; $SETCOLOR_NORMAL
+    for pkg in $_REQUIRED_PACKAGE ; do 
+      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; 
+        sudo apt update ; sudo apt install -y $_REQUIRED_PACKAGE
+        [ "$?" != '0' ] &&  _this_result='f'
+        break;
+      fi
+    done
+  elif [ "$_OS_VERSION" == "centos" ] ; then
+    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_RH
+    for pkg in $_REQUIRED_PACKAGE ; do 
+      if [ ! -e "$(which $pkg 2>/dev/null)" ] ; 
+        sudo yum install epel-release -y
+        sudo yum install $_REQUIRED_PACKAGE -y
+        [ "$?" != '0' ] &&  _this_result='f'
+        break;
+      fi
+    done
+  fi
+  [ "$_this_result" == 'f' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
+
+}
+
 initenv() {
 
+  install_dep_pkg
+ 
   [ -e "${_SCICMDRC}" ] && mv ${_SCICMDRC} ${_SCICMDRC}.bak
 
   $SETCOLOR_WARNING; echo "Start to initenv:"; $SETCOLOR_NORMAL
@@ -33,26 +64,7 @@ initenv() {
   echo "md5sum = $_SCICMD_MD5SUM" >> ${_SCICMDRC}
   chmod 600 ${_SCICMDRC}
 
-  echo "	Install required package : $_REQUIRED_PACKAGE "
-  read -p '[Enter] to go / [Ctrl + c] to exit'
-
-  if [ "$_OS_VERSION" == "ubuntu" ] ; then
-    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_DEB
-    sudo apt update ; sudo apt install -y $_REQUIRED_PACKAGE
-  elif [ "$_OS_VERSION" == "centos" ] ; then
-    _REQUIRED_PACKAGE=$_REQUIRED_PACKAGE_RH
-    sudo yum install epel-release -y
-    sudo yum install $_REQUIRED_PACKAGE -y
-  fi
-    [ "$?" != '0' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
-
-  ## Ubuntu 18.04 would auto-add ~/bin into $PATH
-  #echo "	Check ~/bin and \$PATH ..."
-  #read -p '[Enter] to go / [Ctrl + c] to exit'
-  #if [ -z "$(echo ":${PATH}:" | grep -E "\:${HOME}\/bin\:")" ] ; then
-  #  NEWPATH=${PATH}:${HOME}/bin
-  #  [ "${SHELL}" == '/bin/bash' ] && echo "export PATH=${NEWPATH}" >> ~/.bashrc
-  #fi
+  patch 
 
   $SETCOLOR_SUCCESS ; echo "Done "; $SETCOLOR_NORMAL
 
