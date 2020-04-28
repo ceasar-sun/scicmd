@@ -150,6 +150,27 @@ print_help() {
 
 ### Main
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
@@ -190,7 +211,7 @@ case "$_action" in
         scicmd.dump $@
         ;;
   update)
-        update
+        update && exit 0
         ;;
   *)
         print_help;
