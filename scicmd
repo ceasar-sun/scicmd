@@ -72,8 +72,11 @@ initenv() {
 s3fs-public() {
 
   _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.ro)"
-  _SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
+  _SCIDM_PUBLIC_S3_BUCKET_DEFAULT="scidm00public00obj"
+  #_SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
   _SCIDM_S3_URL="http://s3.twcc.ai/"
+
+  [ "X$1" == "X" ] && _SCIDM_PUBLIC_S3_BUCKET=$_SCIDM_PUBLIC_S3_BUCKET_DEFAULT || _SCIDM_PUBLIC_S3_BUCKET=$1 
 
   $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
@@ -166,7 +169,8 @@ case "$_action" in
         initenv
         ;;
   s3fs-public)
-        s3fs-public
+	shift;
+        s3fs-public $@
         ;;
   s3fs-purge)
         s3fs-purge
