@@ -48,7 +48,7 @@ install_dep_pkg() {
       fi
     done
   fi
-  [ "$_this_result" == 'f' ] && $SETCOLOR_FAILURE && echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " && exit 1;
+  [ "$_this_result" == 'f' ] && $SETCOLOR_FAILURE && ( echo "Install required packages error ! Please install required packages : $_REQUIRED_PACKAGE then run $0 again " ; $SETCOLOR_NORMAL )&& exit 1;
 
 }
 
@@ -71,12 +71,14 @@ initenv() {
 
 s3fs-public() {
 
+  _SCIDM_PUBLIC_S3_BUCKET="$1"
+  
   _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.ro)"
-  _SCIDM_PUBLIC_S3_BUCKET_DEFAULT="scidm00public00obj"
+  #_SCIDM_PUBLIC_S3_BUCKET_DEFAULT="scidm00public00obj"
   #_SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
   _SCIDM_S3_URL="http://s3.twcc.ai/"
 
-  [ "X$1" == "X" ] && _SCIDM_PUBLIC_S3_BUCKET=$_SCIDM_PUBLIC_S3_BUCKET_DEFAULT || _SCIDM_PUBLIC_S3_BUCKET=$1 
+ [ "X$_SCIDM_PUBLIC_S3_BUCKET" == "X" ] && ( $SETCOLOR_FAILURE; echo "Install requir" ; $SETCOLOR_NORMAL ) && exit 102; 
 
   $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
@@ -128,11 +130,19 @@ update() {
 }
 
 print_help() {
-  echo " s3fs-public	: Setup public read s3fs with automount"
-  echo " s3fs-purge	: Setup public read s3fs with automount"
-  echo " initenv	: Install and intifor environment for scicmd tool"
-  echo " update		: Update Scicmd packeage"
-  echo " help		: Print this help menu"
+  echo " S3fs function:"
+  echo "   s3fs-pub <bucket>	: Setup public read-only s3fs with automount"
+  echo "   s3fs-priv <bucket>	: ! Not imppiment yet; Setup writable s3fs with automount "
+  echo "    	* <bucket> could be name or with path in bk, such as: 'bk-name' or 'nk-name:/path/more'	 "
+  echo "   s3fs-purge		: ! Not imppiment yet; Please use 'sudo umount' manually "
+  echo ""
+  echo " Dump function:"
+  echo "     dump <dataset>	:  "
+  echo ""
+  echo " Others:"
+  echo "     initenv	: Install and intifor environment for scicmd tool"
+  echo "     update	: Update Scicmd packeage"
+  echo "     help	: Print this help menu"
 }
 
 
