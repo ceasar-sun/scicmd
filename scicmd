@@ -78,7 +78,7 @@ s3fs-public() {
   #_SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
   _SCIDM_S3_URL="http://s3.twcc.ai/"
 
- [ "X$_SCIDM_PUBLIC_S3_BUCKET" == "X" ] && ( $SETCOLOR_FAILURE; echo "Install requir" ; $SETCOLOR_NORMAL ) && exit 102; 
+ [ "X$_SCIDM_PUBLIC_S3_BUCKET" == "X" ] && ( $SETCOLOR_FAILURE; echo "No bucket name found ?" ; $SETCOLOR_NORMAL ; print_help) && exit 102; 
 
   $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
