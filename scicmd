@@ -154,39 +154,6 @@ print_help() {
   echo "   help		: Print this help menu"
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #--- End of sub
 
 ### Main
@@ -232,7 +199,9 @@ case "$_action" in
         ;;
   update)
         shift;
-        { update $@ && exit 0 }
+        {
+		update $@ && exit 0
+	}
         ;;
   *)
         print_help;
