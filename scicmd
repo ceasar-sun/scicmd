@@ -120,7 +120,7 @@ update() {
 
   _GIT_CHECKOUT_DEFAULT='master'
 
-  [ "X$1" == 'X' ] && _GIT_CHECKOUT=$1 || _GIT_CHECKOUT=$_GIT_CHECKOUT_DEFAULT
+  [ "X$1" != 'X' ] && _GIT_CHECKOUT=$1 || _GIT_CHECKOUT=$_GIT_CHECKOUT_DEFAULT
 
   $SETCOLOR_WARNING; echo "Start to update ...." ;  $SETCOLOR_NORMAL
   echo -n "Update scicmd ..."
