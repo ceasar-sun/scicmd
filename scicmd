@@ -86,7 +86,7 @@ s3fs-public() {
 
   if [ -n "$( mount | grep -E 's3fs .* $_SCIDM_PUBLIC_S3_MNT'  )" ] ; then 
     echo "	$_SCIDM_PUBLIC_S3_MNT is mounted !"
-    $SETCOLOR_WARNING; read -p '[Enter] to go however , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
+    $SETCOLOR_WARNING; read -p '[Enter] to umount first then continue , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
     echo "	Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
     sudo umount ${_SCIDM_PUBLIC_S3_MNT}
   fi
