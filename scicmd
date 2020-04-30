@@ -84,7 +84,7 @@ s3fs-public() {
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] && echo "	mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
 
-  if [ -n "$( mount | grep -E 's3fs .* $_SCIDM_PUBLIC_S3_MNT'  )" ] ; then 
+  if [ -n "$( mount | grep -E "s3fs .* $_SCIDM_PUBLIC_S3_MNT"  )" ] ; then 
     echo "	$_SCIDM_PUBLIC_S3_MNT is mounted !"
     $SETCOLOR_WARNING; read -p '[Enter] to umount first then continue , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
     echo "	Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
