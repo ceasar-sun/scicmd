@@ -50,13 +50,13 @@ pushd ${dump_dir} > /dev/null
 
 for pid in $dataset_list ; do
   
-  echo "Star to dump : $pid"
+  echo "Start to dump : $pid"
   mkdir -p ${pid}/data
 
   # deal with dataset
   cd ${pid}
 
-  # dump metadata fro dataset
+  # dump metadata from dataset
     wget -q ${ckan_site}/api/3/action/package_show?id=${pid} -O - | jq '.' > metadata.json
 
     # download resource  foreach
@@ -70,31 +70,76 @@ for pid in $dataset_list ; do
     IFS=$(echo -en "\n\b")
     
     #for resource_url in `cat metadata.json | jq '.result.resources[].url' ` ; do 
-    for entry in `jq -c '.result.resources[]|{"name","url"}' metadata.json`; do
+    for entry in `jq -c '.result.resources[]|{"name","url", "id"}' metadata.json`; do
       #echo "'$entry'"
       eval "$(echo $entry |jq -r ' to_entries | .[] | .key + "=\"" + .value + "\""' )"
       resource_url="$url"
       resource_name="$name"
       total_c=`expr $total_c + 1`
 
+      #get resource id
+      resource_id="$id"
+
+      #if file exists in data directory, retrieve md5 from remote resource and compare it with local file
+      if [ -e "data/${resource_name}" ] ; then
+        #retrieve md5 from local file
+        local_md5="$(md5sum data/${resource_name} | awk '{print $1}')"
+        #echo "$local_md5"
+
+        #retrieve md5 from remote resource
+        wget -q ${ckan_site}/api/action/resource_show?id=${resource_id} -O - | jq '.' > ${resource_name}.json
+        remote_md5="$(jq -c '.result.MD5' ${resource_name}.json | tr -d '"')"
+
+        #remove resource.json file
+        rm ${resource_name}.json
+        #echo "$remote_md5"
+        
+        if [ "$local_md5" = "$remote_md5" ] ; then
+          echo "${resource_name} ... File version did not change"
+          echo "Duplicated : ${resource_name},$resource_url," >> $dump_log ;
+        #else download the new version of the resource
+        else
+          if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
+            echo -n "#$total_c : Download resource : '$resource_name' ..."
+            eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
+            if [ "$?" -eq 0 ] ; then
+              echo " done." ; echo "Succeeded : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
+            else
+              rm -rf data/${resource_name}
+              echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
+            fi
+          else
+            success_c=`expr $success_c + 1`
+            echo "#$total_c : write url to '${resource_name}.url'"
+            echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
+            echo "$resource_url" > data/${resource_name}.url
+          fi
+        fi
+        
+      
+      #else download file as normal
+      else
+        if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
+          echo -n "#$total_c : Download resource : '$resource_name' ..."
+          eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
+          if [ "$?" -eq 0 ] ; then
+            echo " done." ; echo "Succeeded : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
+          else
+            rm -rf data/${resource_name}
+            echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
+          fi
+        else
+          success_c=`expr $success_c + 1`
+          echo "#$total_c : write url to '${resource_name}.url'"
+          echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
+          echo "$resource_url" > data/${resource_name}.url
+        fi
+      fi
+        
+      
+
       #echo "'$resource_url', '$resource_name'"
       #continue;
-
-      if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
-        echo -n "#$total_c : Download resource : '$resource_name' ..."
-        eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
-	if [ "$?" -eq 0 ] ; then
-          echo " done." ; echo "Successed : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
-	else
-	  rm -rf data/${resource_name}
-          echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
-	fi
-      else
-	success_c=`expr $success_c + 1`
-	echo "#$total_c : write url to '${resource_name}.url'"
-        echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
-        echo "$resource_url" > data/${resource_name}.url
-      fi
 
       #read
     done
