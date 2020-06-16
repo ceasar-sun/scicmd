@@ -119,15 +119,17 @@ s3fs-public() {
 update() {
 
   _GIT_CHECKOUT_DEFAULT='master'
+  _GIT_PROJECT_URL='https://aigit.nchc.org.tw/ceasar.sun/scicmd.git'
+  #git clone https://github.com/ceasar-sun/scicmd.git /tmp/scicmd.git.tmp 
+
 
   [ "X$1" != 'X' ] && _GIT_CHECKOUT=$1 || _GIT_CHECKOUT=$_GIT_CHECKOUT_DEFAULT
 
   $SETCOLOR_WARNING; echo "Start to update ...." ;  $SETCOLOR_NORMAL
   echo -n "Update scicmd ..."
   [ -e "/tmp/scicmd.git.tmp" ] && rm -rf "/tmp/scicmd.git.tmp"
-  #wget wget https://github.com/ceasar-sun/scicmd/archive/master.zip -O /tmp/scicmd-master.zip
-  #wget -q https://raw.githubusercontent.com/ceasar-sun/scicmd/master/scicmd -O "/tmp/scicmd.tmp"
-  git clone https://github.com/ceasar-sun/scicmd.git /tmp/scicmd.git.tmp 
+
+  git clone ${_GIT_PROJECT_URL} /tmp/scicmd.git.tmp 
   cd /tmp/scicmd.git.tmp ; git checkout $_GIT_CHECKOUT ; cd -
   cp /tmp/scicmd.git.tmp/scicmd* ${_BIN_PATH}/
   sync; sync;
