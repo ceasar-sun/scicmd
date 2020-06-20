@@ -165,6 +165,8 @@ _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
 _REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
 
+_SCICMD_VERSION=''
+
 _CURRENT_REALRUN="$(readlink -f ${BASH_SOURCE[0]})"
 
 source <(grep -E '^ID=' /etc/os-release)
