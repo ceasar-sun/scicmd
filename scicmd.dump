@@ -80,6 +80,9 @@ for pid in $dataset_list ; do
       #get resource id
       resource_id="$id"
 
+      #set download status
+      download_status=true
+
       #if file exists in data directory, retrieve md5 from remote resource and compare it with local file
       if [ -e "data/${resource_name}" ] ; then
         #retrieve md5 from local file
@@ -97,28 +100,13 @@ for pid in $dataset_list ; do
         if [ "$local_md5" = "$remote_md5" ] ; then
           echo "${resource_name} ... File version did not change"
           echo "Duplicated : ${resource_name},$resource_url," >> $dump_log ;
-        #else download the new version of the resource
-        else
-          if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
-            echo -n "#$total_c : Download resource : '$resource_name' ..."
-            eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
-            if [ "$?" -eq 0 ] ; then
-              echo " done." ; echo "Succeeded : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
-            else
-              rm -rf data/${resource_name}
-              echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
-            fi
-          else
-            success_c=`expr $success_c + 1`
-            echo "#$total_c : write url to '${resource_name}.url'"
-            echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
-            echo "$resource_url" > data/${resource_name}.url
-          fi
+          download_status=false
+          #else download the new version of the resource
         fi
-        
-      
-      #else download file as normal
-      else
+      fi
+
+      #download as normal
+      if [ "$download_status" = true ] ; then
         if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
           echo -n "#$total_c : Download resource : '$resource_name' ..."
           eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
