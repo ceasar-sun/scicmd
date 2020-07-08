@@ -24,13 +24,14 @@ dataset_list=""
 #echo $@
 
 # get parameter form command
-while getopts a:r:d: option
+while getopts a:r:d:c option
 do
   case "${option}"
   in
     a) [ ! -z "${OPTARG}" ] && api_key=${OPTARG} ;;
     r) [ ! -z "${OPTARG}" ] && ckan_site=${OPTARG};;
     d) [ ! -z "${OPTARG}" ] && dump_dir=${OPTARG};;
+    c) sync_local=true;;
   esac
 done
 
@@ -83,6 +84,10 @@ for pid in $dataset_list ; do
       #set download status
       download_status=true
 
+      if [ "$sync_local" = true ] ; then
+        echo "$resource_name" >> files.txt
+      fi
+
       #if file exists in data directory, retrieve md5 from remote resource and compare it with local file
       if [ -e "data/${resource_name}" ] ; then
         #retrieve md5 from local file
@@ -91,7 +96,7 @@ for pid in $dataset_list ; do
 
         #retrieve md5 from remote resource
         wget -q ${ckan_site}/api/action/resource_show?id=${resource_id} -O - | jq '.' > ${resource_name}.json
-        remote_md5="$(jq -c '.result.MD5' ${resource_name}.json | tr -d '"')"
+        remote_md5="$(jq -c '.result.md5' ${resource_name}.json | tr -d '"')"
 
         #remove resource.json file
         rm ${resource_name}.json
@@ -131,6 +136,25 @@ for pid in $dataset_list ; do
 
       #read
     done
+
+    if [ "$sync_local" = true ] ; then
+      #loop data directory and remove files that don't exist on remote server
+      cd data
+      for file in * ; do
+        if grep -Fxq "$file" ../files.txt
+        then
+          continue
+        else
+          rm -rf "$file"
+        fi
+      done
+      cd ..
+
+      echo "Sync local directory with remote server."
+
+      rm files.txt
+    fi
+    
 
     IFS=$SAVEIFS
     echo "Total=$total_c ,Successed=$success_c, Failed=$fail_c"
