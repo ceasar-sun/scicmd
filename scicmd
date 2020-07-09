@@ -149,6 +149,7 @@ print_help() {
   echo "     -a api-key		: user's api key in CKAN site"
   echo "     -r ckan-site	: use NCHC Scidm(https://scidm.nchc.org.tw) as default"
   echo "     -d dump-folder	: use '~/my-scidata.rep' as default"
+  echo "     -c			: delete files if it doesn't exist in CKAN server"
   echo ""
   echo " Others:"
   echo "   initenv	: Install and initialize for environment for scicmd tool"

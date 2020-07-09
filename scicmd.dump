@@ -18,7 +18,8 @@ dump_log="scicmd.dump.log"
 
 ckan_site="https://scidm.nchc.org.tw"
 api_key=""
-dump_dir="$( readlink -f ~/my-scidata.rep )"
+#dump_dir="$( readlink -f ~/my-scidata.rep )"
+dump_dir="."
 dataset_list=""
 
 #echo $@
@@ -70,40 +71,35 @@ for pid in $dataset_list ; do
     SAVEIFS=$IFS
     IFS=$(echo -en "\n\b")
     
-    #for resource_url in `cat metadata.json | jq '.result.resources[].url' ` ; do 
-    for entry in `jq -c '.result.resources[]|{"name","url", "id"}' metadata.json`; do
-      #echo "'$entry'"
+    #for entry in `jq -c '.result.resources[] |select(.url_type=="upload" ) |  {"name","url", "id"}' metadata.json`; do
+    for entry in `jq -c '.result.resources[] | {"name","url", "id"}' metadata.json`; do
+      >&2 echo "entry='$entry'"
       eval "$(echo $entry |jq -r ' to_entries | .[] | .key + "=\"" + .value + "\""' )"
+      # get resource info form JSON
+      resource_id="$id"
       resource_url="$url"
       resource_name="$name"
-      total_c=`expr $total_c + 1`
 
-      #get resource id
-      resource_id="$id"
+      total_c=`expr $total_c + 1`
 
       #set download status
       download_status=true
 
-      if [ "$sync_local" = true ] ; then
-        echo "$resource_name" >> files.txt
-      fi
+      #if [ "$sync_local" = true ] ; then
+      #  echo "$resource_name" >> files.txt
+      #fi
 
       #if file exists in data directory, retrieve md5 from remote resource and compare it with local file
       if [ -e "data/${resource_name}" ] ; then
         #retrieve md5 from local file
         local_md5="$(md5sum data/${resource_name} | awk '{print $1}')"
-        #echo "$local_md5"
+        >&2 echo "md5.local : '$local_md5'"
 
         #retrieve md5 from remote resource
-        wget -q ${ckan_site}/api/action/resource_show?id=${resource_id} -O - | jq '.' > ${resource_name}.json
-        remote_md5="$(jq -c '.result.md5' ${resource_name}.json | tr -d '"')"
+	remote_md5="$(wget -q ${ckan_site}/api/action/resource_show?id=${resource_id} -O - | jq -r '.result.md5')"
 
-        #remove resource.json file
-        rm ${resource_name}.json
-        #echo "$remote_md5"
-        
         if [ "$local_md5" = "$remote_md5" ] ; then
-          echo "${resource_name} ... File version did not change"
+          >&2 echo "'${resource_name}' : Resource didn't change , skip !"
           echo "Duplicated : ${resource_name},$resource_url," >> $dump_log ;
           download_status=false
           #else download the new version of the resource
@@ -122,40 +118,24 @@ for pid in $dataset_list ; do
             echo " fail & log to  : '$resource_url' !"; echo "Failed : ${resource_name},$resource_url" >> $dump_log ; fail_c=`expr $fail_c + 1`
           fi
         else
-          success_c=`expr $success_c + 1`
-          echo "#$total_c : write url to '${resource_name}.url'"
+          echo "Skip url type :'${resource_name}' and write into $dump_log"
+          #echo "#$total_c : write url to '${resource_name}.url'"
           echo "URL : ${resource_name}.url,$resource_url" >> $dump_log 	
-          echo "$resource_url" > data/${resource_name}.url
+          #echo "$resource_url" > data/${resource_name}.url
         fi
       fi
         
-      
-
-      #echo "'$resource_url', '$resource_name'"
-      #continue;
-
-      #read
     done
 
     if [ "$sync_local" = true ] ; then
       #loop data directory and remove files that don't exist on remote server
-      cd data
-      for file in * ; do
-        if grep -Fxq "$file" ../files.txt
-        then
-          continue
-        else
-          rm -rf "$file"
-        fi
+      #cd data
+      for rfile in `cd data ; find | awk -F '/' '{print $2}'` ; do
+        [ -z "$(jq -r '.result.resources[] | select(.url_type=="upload" ) |.name ' metadata.json | grep ^$rfile$)"  ] && ( echo clean  '$rfile'; rm -rfv "data/$rfile" )
       done
-      cd ..
-
-      echo "Sync local directory with remote server."
-
-      rm files.txt
+      #rm files.txt
     fi
     
-
     IFS=$SAVEIFS
     echo "Total=$total_c ,Successed=$success_c, Failed=$fail_c"
   cd ..
