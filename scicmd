@@ -71,8 +71,9 @@ initenv() {
 
 s3fs-public() {
 
-  _SCIDM_PUBLIC_S3_BUCKET="$1"
-  
+  #_SCIDM_PUBLIC_S3_BUCKET="$1"
+  [ -z "$1" ] && _SCIDM_PUBLIC_S3_BUCKET="$_SCIDM_DEFAULT_S3_BUCKET" || _SCIDM_PUBLIC_S3_BUCKET="$1"
+
   _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.ro)"
   #_SCIDM_PUBLIC_S3_BUCKET_DEFAULT="scidm00public00obj"
   #_SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
@@ -165,6 +166,7 @@ _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
 _REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
+_SCIDM_DEFAULT_S3_BUCKET="scidm.root"
 
 _SCICMD_VERSION=''
 
