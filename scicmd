@@ -71,30 +71,47 @@ initenv() {
 
 s3fs-public() {
 
-  #_SCIDM_PUBLIC_S3_BUCKET="$1"
-  [ -z "$1" ] && _SCIDM_PUBLIC_S3_BUCKET="$_SCIDM_DEFAULT_S3_BUCKET" || _SCIDM_PUBLIC_S3_BUCKET="$1"
-
-  _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.ro)"
-  #_SCIDM_PUBLIC_S3_BUCKET_DEFAULT="scidm00public00obj"
-  #_SCIDM_PUBLIC_S3_BUCKET="202004covid19obj"
+  _SCIDM_DEFAULT_S3_BUCKET="scidm.root"
+  _PATH_DEFAULT_S3_BUCKET="/group"
+  #_SCIDM_PUBLIC_S3_MNT_HIDDEN="$(readlink -f ~/.s3.scidm.ro)"
+  _SCIDM_PUBLIC_S3_MNT="$(readlink -f ~/s3.scidm.public)"
   _SCIDM_S3_URL="http://s3.twcc.ai/"
 
- [ "X$_SCIDM_PUBLIC_S3_BUCKET" == "X" ] && ( $SETCOLOR_FAILURE; echo "No bucket name found ?" ; $SETCOLOR_NORMAL ; print_help) && exit 102; 
+  _SCIDM_PUBLIC_S3_BUCKET=
+  _PATH_OF_S3_BUCKET=
 
-  $SETCOLOR_WARNING; echo "Start to s3fs-public:" ; $SETCOLOR_NORMAL ;
+  # get parameter form command
+  while getopts n:d:c option
+  do
+    case "${option}"
+    in
+      n) [ ! -z "${OPTARG}" ] && _SCIDM_PUBLIC_S3_BUCKET=${OPTARG};;
+      #d) [ ! -z "${OPTARG}" ] && _PATH_OF_S3_BUCKET=${OPTARG};;
+      c) sync_local=true;;
+    esac
+  done
+
+  [ "X$_SCIDM_PUBLIC_S3_BUCKET" == "X" ] && _SCIDM_PUBLIC_S3_BUCKET="$_SCIDM_DEFAULT_S3_BUCKET"
+  #[ "X$_PATH_OF_S3_BUCKET" == "X" ] && _PATH_OF_S3_BUCKET="$_PATH_DEFAULT_S3_BUCKET"
+
+  $SETCOLOR_WARNING; echo "Start to s3fs-public via :'${_SCIDM_S3_URL} : ${_SCIDM_PUBLIC_S3_BUCKET}'"; $SETCOLOR_NORMAL ;
+  #[ ! -d "${_SCIDM_PUBLIC_S3_MNT_HIDDEN}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT_HIDDEN
   [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] &&  mkdir $_SCIDM_PUBLIC_S3_MNT
-  [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] && echo "	mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
+  #[ ! -d "${_SCIDM_PUBLIC_S3_MNT_HIDDEN}" ] && echo "  mkdir $_SCIDM_PUBLLIC_S3_MNT_HIDDEN failed ? exit now." && exit 1;
+  [ ! -d "${_SCIDM_PUBLIC_S3_MNT}" ] && echo "  mkdir $_SCIDM_PUBLLIC_S3_MNT failed ? exit now." && exit 1;
 
   if [ -n "$( mount | grep -E "s3fs .* $_SCIDM_PUBLIC_S3_MNT"  )" ] ; then 
     echo "	$_SCIDM_PUBLIC_S3_MNT is mounted !"
     $SETCOLOR_WARNING; read -p '[Enter] to umount first then continue , [Ctrl + c] to exit ' ;  $SETCOLOR_NORMAL ;
-    echo "	Umount s3fs of ${_SCIDM_PUBLIC_S3_MNT} ..."
+    echo "	Umount s3fs of  '${_SCIDM_PUBLIC_S3_MNT}'..."
     sudo umount ${_SCIDM_PUBLIC_S3_MNT}
+    #sudo umount ${_SCIDM_PUBLIC_S3_MNT_HIDDEN}
   fi
 
 
   echo "	Test to mount Scidm public s3 bucket '$_SCIDM_PUBLIC_S3_BUCKET' on '$_SCIDM_PUBLIC_S3_MNT' "
   s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
+  #sudo mount -o bind ${_SCIDM_PUBLIC_S3_MNT_HIDDEN}${_PATH_OF_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}
   _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
   if [ "$?" == '0' -a -n "$(mount | grep -E '^s3fs .*s3.scidm.ro')" ] ; then
     $SETCOLOR_SUCCESS ; echo "	Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
@@ -110,6 +127,7 @@ s3fs-public() {
   else
     echo "	Add auto-mount into user crontab ..."
     echo "@reboot        s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS -o public_bucket=1" | crontab -
+    #echo "@reboot        mount -o bind ${_SCIDM_PUBLIC_S3_MNT_HIDDNE} ${_SCIDM_PUBLIC_S3_MNT}" | crontab -
     echo "	Success ! Public s3 of Scidm would be auto-mount when next boot."
   fi
   $SETCOLOR_SUCCESS ; echo "	Scidm public s3 is ready to use and mounted in '${_SCIDM_PUBLIC_S3_MNT}' :"; $SETCOLOR_NORMAL ;
@@ -166,7 +184,6 @@ _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
 _REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
 _REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
-_SCIDM_DEFAULT_S3_BUCKET="scidm.root"
 
 _SCICMD_VERSION=''
 
