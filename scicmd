@@ -113,7 +113,7 @@ s3fs-public() {
   s3fs ${_SCIDM_PUBLIC_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}  -o url=${_SCIDM_S3_URL} -o use_path_request_style -o umask=0227,uid=$UID,gid=$GROUPS  -o public_bucket=1
   #sudo mount -o bind ${_SCIDM_PUBLIC_S3_MNT_HIDDEN}${_PATH_OF_S3_BUCKET} ${_SCIDM_PUBLIC_S3_MNT}
   _result="$(ls $_SCIDM_PUBLIC_S3_MNT 2>/dev/null)"
-  if [ "$?" == '0' -a -n "$(mount | grep -E '^s3fs .*s3.scidm.ro')" ] ; then
+  if [ "$?" == '0' -a -n "$(mount | grep -E '^s3fs .*')" ] ; then
     $SETCOLOR_SUCCESS ; echo "	Mount public scidm s3fs : success ! "; $SETCOLOR_NORMAL
     mount | grep s3fs
   else
