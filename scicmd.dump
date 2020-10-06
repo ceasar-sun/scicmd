@@ -21,6 +21,7 @@ api_key=""
 #dump_dir="$( readlink -f ~/my-scidata.rep )"
 dump_dir="."
 dataset_list=""
+sync_local=false
 
 #echo $@
 
@@ -85,10 +86,6 @@ for pid in $dataset_list ; do
       #set download status
       download_status=true
 
-      #if [ "$sync_local" = true ] ; then
-      #  echo "$resource_name" >> files.txt
-      #fi
-
       #if file exists in data directory, retrieve md5 from remote resource and compare it with local file
       if [ -e "data/${resource_name}" ] ; then
         #retrieve md5 from local file
@@ -97,6 +94,7 @@ for pid in $dataset_list ; do
 
         #retrieve md5 from remote resource
 	remote_md5="$(wget -q ${ckan_site}/api/action/resource_show?id=${resource_id} -O - | jq -r '.result.md5')"
+        >&2 echo "md5.remote : '$remote_md5'"
 
         if [ "$local_md5" = "$remote_md5" ] ; then
           >&2 echo "'${resource_name}' : Resource didn't change , skip !"
