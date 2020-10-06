@@ -107,8 +107,8 @@ for pid in $dataset_list ; do
       #download as normal
       if [ "$download_status" = true ] ; then
         if [ -n "$(echo $resource_url | grep -E "^${ckan_site}/")" ] ; then
-          echo -n "#$total_c : Download resource : '$resource_name' ..."
-          eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O data/${resource_name}"
+          echo -n "#$total_c : Download resource : '$resource_name' via: wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O 'data/${resource_name}'"
+          eval "wget -q --no-check-certificate $resource_url ${APIKEY_HEADER} -O 'data/${resource_name}'"
           if [ "$?" -eq 0 ] ; then
             echo " done." ; echo "Succeeded : ${resource_name},$resource_url," >> $dump_log ; success_c=`expr $success_c + 1`
           else
