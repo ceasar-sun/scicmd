@@ -206,6 +206,8 @@ _SCICMD_MD5SUM="$( md5sum $_CURRENT_REALRUN | awk '{print $1}')"
 
 _action=$1
 
+export PATH=~/bin:$PATH
+
 case "$_action" in
   initenv)
         initenv
