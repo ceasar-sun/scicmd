@@ -138,7 +138,10 @@ s3fs-public() {
 update() {
 
   _GIT_CHECKOUT_DEFAULT='master'
-  _GIT_PROJECT_URL='https://aigit.nchc.org.tw/ceasar.sun/scicmd.git'
+  #_SCICMD_URL='http://scidm.nchc.org.tw/scicmd-installer'
+  #_SCICMD_DUMP_URL='http://scidm.nchc.org.tw/scicmd-installer'
+  #_GIT_PROJECT_URL='https://aigit.nchc.org.tw/ceasar.sun/scicmd.git'
+  _GIT_PROJECT_URL='https://github.com/ceasar-sun/scicmd.git'
   #git clone https://github.com/ceasar-sun/scicmd.git /tmp/scicmd.git.tmp 
 
 
@@ -146,11 +149,13 @@ update() {
 
   $SETCOLOR_WARNING; echo "Start to update ...." ;  $SETCOLOR_NORMAL
   echo -n "Update scicmd ..."
-  [ -e "/tmp/scicmd.git.tmp" ] && rm -rf "/tmp/scicmd.git.tmp"
+  [ -e "/tmp/scicmd-update.git" ] && rm -rf "/tmp/scicmd-update.git"
 
-  git clone ${_GIT_PROJECT_URL} /tmp/scicmd.git.tmp 
-  cd /tmp/scicmd.git.tmp ; git checkout $_GIT_CHECKOUT ; cd -
-  cp /tmp/scicmd.git.tmp/scicmd* ${_BIN_PATH}/
+  #mkdir /tmp/scicmd-update.tmp ; popd /tmp/scicmd-update.tmp
+  #wget    ${_SCICMD_URL} -O /tmp/scicmd-update.tmp 
+  git clone ${_GIT_PROJECT_URL} /tmp/scicmd-update.git
+  #cd /tmp/scicmd.git.tmp ; git checkout $_GIT_CHECKOUT ; cd -
+  cp /tmp/scicmd.git/scicmd* ${_BIN_PATH}/
   sync; sync;
   chmod +x ${_BIN_PATH}/scicmd*
   echo "done"
@@ -159,8 +164,8 @@ update() {
 print_help() {
   echo " S3fs function:"
   echo "   s3fs-pub <bucket>	: Setup public read-only s3fs with automount"
-  echo "   s3fs-priv <bucket>	: ! Not imppiment yet; Setup writable s3fs with automount "
-  echo "   s3fs-purge		: ! Not imppiment yet; Please use 'sudo umount' manually "
+  echo "   s3fs-priv <bucket>	: ! Not implement yet; Setup writable s3fs with automount "
+  echo "   s3fs-purge		: ! Not implement yet; Please use 'sudo umount' manually "
   echo " ** <bucket> name or with path in bk, such as: 'bk-name' or 'nk-name:/path/more'	 "
   echo ""
   echo " Dump function:"
@@ -182,7 +187,7 @@ print_help() {
 
 _SCICMDRC="${HOME}/.scicmdrc"
 _BIN_PATH="$(readlink -f ${HOME}/bin)"
-_REQUIRED_PACKAGE_DEB="s3fs jq python-pip sqlite3 curl wget git"
+_REQUIRED_PACKAGE_DEB="s3fs jq python3-pip sqlite3 curl wget git"
 _REQUIRED_PACKAGE_RH="jq python-pip curl wget git"
 
 _SCICMD_VERSION=''

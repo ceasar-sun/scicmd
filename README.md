@@ -13,7 +13,7 @@ scicmd 為提供 Debian-liked Linux 環境下之 Scidm 資料平台使用者，�
   * 其他：開發中
 
 目前支援 Linux 版本有：
-  * Ubuntu 18.04
+  * Ubuntu 20.04 , 18.04
   * Debian 10
 
 ## Install
