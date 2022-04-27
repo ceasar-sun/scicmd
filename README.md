@@ -28,8 +28,8 @@ scicmd 為提供 Debian-liked Linux 環境下之 Scidm 資料平台使用者，�
 
  S3fs function:
    s3fs-pub <bucket>    : Setup public read-only s3fs with automount
-   s3fs-priv <bucket>   : ! Not imppiment yet; Setup writable s3fs with automount
-   s3fs-purge           : ! Not imppiment yet; Please use 'sudo umount' manually
+   s3fs-priv <bucket>   : ! Not implement yet; Setup writable s3fs with automount
+   s3fs-purge           : ! Not implement yet; Please use 'sudo umount' manually
  ** <bucket> name or with path in bk, such as: 'bk-name' or 'nk-name:/path/more'
 
  Dump function:
